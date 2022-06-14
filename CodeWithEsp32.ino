@@ -8,7 +8,6 @@ LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars
 int co2;
 int co;
 #define DHTTYPE DHT21  
-
 DHT dht(DHTPIN, DHTTYPE);
 WiFiMulti WiFiMulti;
 
@@ -16,13 +15,14 @@ const char* ssid     = "Reverb"; // Your SSID (Name of your WiFi)
 const char* password = "Pr0p$rtyflip"; //Your Wifi password
 
 const char* host = "api.thingspeak.com";
-String api_key = "4JQM0T565IPCTCJ9"; // Your API Key provied by thingspeak
+
+String api_key = "NMT1E6UIVL3LNZEL"; // Your API Key provied by thingspeak
 void setup(){
   Serial.begin(9600);
    Serial.println(F("DHTxx test!"));
    pinMode(33,INPUT);
   dht.begin();
-  Connect_to_Wifi();
+  lcd.setCursor(0, 0);
   lcd.init();                    
   lcd.backlight();
 }
@@ -32,25 +32,15 @@ void loop(){
   int h = dht.readHumidity();
   int t = dht.readTemperature();
   int f = dht.readTemperature(true);
-  co2=map(analogRead(33),0,2111,0,100);
-  co=map(analogRead(35),1800,4095,0,100);
-  Serial.println(h);
+  co2=map(analogRead(33),0,2111,0,200);
+  co=map(analogRead(35),2900,4095,0,200);
 
-
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.println(F("°C "));
- // call function to send data to Thingspeak
-  Send_Data(t,h,co2,co);
-  delay(5000);
-    lcd.setCursor(0, 0);
+  lcd.setCursor(0, 0);
   lcd.print("Tmp:");
   lcd.setCursor(4, 0);
   lcd.print(t);
   lcd.setCursor(6, 0);
-  lcd.print("%");
+  lcd.print("c");
 
   lcd.setCursor(10, 0);
   lcd.print("Hm:");
@@ -66,12 +56,14 @@ void loop(){
   lcd.setCursor(6, 1);
   lcd.print("%");
 
-  lcd.setCursor(10, 1);
+  lcd.setCursor(8, 1);
   lcd.print("Co:");
-  lcd.setCursor(13, 1);
+  lcd.setCursor(11, 1);
   lcd.print(co);
    lcd.setCursor(15, 1);
   lcd.print("%");
+  Connect_to_Wifi();
+  Send_Data(t,h,co2,co);
 
 }
 
@@ -81,13 +73,13 @@ void Connect_to_Wifi()
   WiFiMulti.addAP(ssid, password);
 
   Serial.println();
-  Serial.println();
-  Serial.print("Wait for WiFi... ");
 
-  while (WiFiMulti.run() != WL_CONNECTED) {
+  
+    while (WiFiMulti.run() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
+
 
   Serial.println("");
   Serial.println("WiFi connected");
